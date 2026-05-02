@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sanatan Kriya | Quote Builder</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bhagwa: "#d97706",
+            deepBhagwa: "#b45309",
+            kesar: "#f59e0b",
+            softKesar: "#fde68a",
+            temple: "#fff7ed",
+            darkBrown: "#4a2c13",
+            goldLight: "#fffbeb",
+            saffron: {
+              50:  '#FAEEDA',
+              100: '#FAC775',
+              200: '#EF9F27',
+              400: '#BA7517',
+              600: '#854F0B',
+              800: '#633806',
+              900: '#412402',
+            },
+            cream: '#FFFDF7',
+          },
+          fontFamily: {
+            heading: ["Georgia", "serif"],
+            body: ["Poppins", "sans-serif"],
+            display: ['"Playfair Display"', 'serif']
+          },
+          boxShadow: {
+            spiritual: "0 10px 40px rgba(180, 83, 9, 0.18)",
+            glow: "0 0 30px rgba(245, 158, 11, 0.22)"
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+
+    p {
+      font-size: 1.05rem;
+      font-weight: 500;
+      line-height: 1.8;
+    }
+
+    @media (min-width: 768px) {
+      p {
+        font-size: 1.15rem;
+      }
+    }
+
+    /* QUOTE BUILDER STYLES */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 14px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid #f3c78a;
+      color: #633806;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      background: #fffdf7;
+      user-select: none;
+    }
+
+    .pill:hover {
+      border-color: #BA7517;
+      background: #FAEEDA;
+    }
+
+    .pill.active {
+      background: #FAEEDA;
+      border-color: #BA7517;
+      color: #412402;
+      box-shadow: 0 0 0 3px rgba(186,117,23,0.12);
+    }
+
+    .pill.bundle.active {
+      background: #BA7517;
+      color: #fff;
+      border-color: #854F0B;
+    }
+
+    .detail-card {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      margin-top: 0;
+      transition: max-height 0.3s ease, opacity 0.25s ease, margin 0.2s ease;
+    }
+
+    .detail-card.open {
+      max-height: 300px;
+      opacity: 1;
+      margin-top: 10px;
+    }
+
+    .section-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #a08060;
+      margin-bottom: 14px;
+    }
+
+    .section-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #f3d9b5;
+    }
+
+    .pax-input,
+    .text-input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #f1c88e;
+      border-radius: 14px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px;
+      background: #fff8ee;
+      color: #412402;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .pax-input {
+      width: 90px;
+      text-align: center;
+    }
+
+    .pax-input:focus,
+    .text-input:focus {
+      outline: none;
+      border-color: #BA7517;
+      box-shadow: 0 0 0 3px rgba(186,117,23,0.1);
+    }
+
+    .quote-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 16px;
+      padding: 8px 0;
+      border-bottom: 1px dashed rgba(186,117,23,0.25);
+      font-size: 13px;
+    }
+
+    .quote-row:last-child {
+      border-bottom: none;
+    }
+
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-in {
+      animation: fadeSlideIn 0.25s ease forwards;
+    }
+
+    .btn-primary {
+      background: linear-gradient(to right, #f59e0b, #ea580c);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 9999px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      box-shadow: 0 10px 30px rgba(180, 83, 9, 0.18);
+    }
+
+    .btn-primary:hover {
+      transform: scale(1.03);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: #854F0B;
+      border: 1px solid #f1c88e;
+      padding: 12px 20px;
+      border-radius: 9999px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .btn-ghost:hover {
+      background: #fff1dc;
+    }
+  </style>
+</head>
+
+<body class="font-body text-darkBrown overflow-x-hidden bg-[linear-gradient(180deg,#fffaf0_0%,#fff4d8_25%,#fff1dc_55%,#fff8ef_100%)]">
+
+  <!-- MANDALA -->
+  <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+    <img
+      id="mainMandala"
+      src="assets/images/bg5.png"
+      alt="Mandala Background"
+      class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[780px] md:w-[980px] lg:w-[1150px] max-w-none opacity-[0.08] md:opacity-[0.1] select-none"
+    />
+  </div>
+
+  <div class="relative z-10">
+
+    <!-- HEADER -->
+    <header class="sticky top-0 z-50 border-b border-orange-200/70 bg-white/80 backdrop-blur-xl">
+      <div class="max-w-7xl mx-auto px-6 lg:px-10">
+        <div class="h-20 flex items-center justify-between">
+
+          <a href="index.html" class="flex items-center gap-3">
+            <img
+              src="assets/images/SK logo.png"
+              alt="Sanatan Kriya Logo"
+              class="h-14 md:h-16 w-auto object-contain"
+            />
+          </a>
+
+          <nav class="hidden md:flex items-center gap-8 font-medium">
+            <a href="index.html" class="hover:text-bhagwa transition">Home</a>
+            <a href="about.html" class="hover:text-bhagwa transition">About us</a>
+            <a href="calendar.html" class="hover:text-bhagwa transition">Calendar</a>
+            <a href="videos.html" class="hover:text-bhagwa transition">Dev Katha</a>
+            <a href="gallery.html" class="hover:text-bhagwa transition">HD Gallery</a>
+            <a href="aarti.html" class="hover:text-bhagwa transition">Aarti</a>
+            <a href="artist.html" class="hover:text-bhagwa transition">Artists</a>
+            <a href="quote-builder.html" class="text-bhagwa font-semibold">Quote Builder</a>
+          </nav>
+
+          <div class="flex items-center gap-3">
+            <a href="#quote-builder" class="hidden md:inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 text-white font-medium shadow-spiritual hover:scale-105 transition">
+              Build Quote
+            </a>
+
+            <button
+              id="menuToggle"
+              class="md:hidden w-11 h-11 rounded-full border border-orange-200 bg-white flex items-center justify-center"
+              aria-label="Open menu"
+              aria-expanded="false"
+              type="button"
+            >
+              <span class="relative block w-5 h-5">
+                <span class="absolute left-0 top-[3px] w-5 h-0.5 bg-deepBhagwa rounded transition-all duration-300 line1"></span>
+                <span class="absolute left-0 top-[9px] w-5 h-0.5 bg-deepBhagwa rounded transition-all duration-300 line2"></span>
+                <span class="absolute left-0 top-[15px] w-5 h-0.5 bg-deepBhagwa rounded transition-all duration-300 line3"></span>
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- MOBILE MENU -->
+        <div id="mobileMenu" class="md:hidden hidden pb-5">
+          <div class="rounded-2xl border border-orange-100 bg-white/95 p-4 space-y-3 shadow-lg">
+            <a href="index.html" class="block px-3 py-2 rounded-xl hover:bg-orange-50">Home</a>
+            <a href="about.html" class="block px-3 py-2 rounded-xl hover:bg-orange-50">About</a>
+            <a href="calendar.html" class="block px-3 py-2 rounded-xl hover:bg-orange-50">Calendar</a>
+            <a href="videos.html" class="block px-3 py-2 rounded-xl hover:bg-orange-50">Dev Katha</a>
+            <a href="gallery.html" class="block px-3 py-2 rounded-xl hover:bg-orange-50">HD Gallery</a>
+            <a href="aarti.html" class="block px-3 py-2 rounded-xl hover:bg-orange-50">Aarti</a>
+            <a href="artist.html" class="block px-3 py-2 rounded-xl hover:bg-orange-50">Artists</a>
+            <a href="quote-builder.html" class="block px-3 py-2 rounded-xl bg-orange-50 text-bhagwa font-semibold">Quote Builder</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- HERO -->
+    <section class="relative min-h-[72vh] flex items-center overflow-hidden">
+      <div class="relative max-w-7xl mx-auto px-6 lg:px-10 w-full py-20">
+        <div class="max-w-3xl reveal opacity-0 translate-y-6 transition-all duration-500">
+          <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/70 border border-orange-200 mb-5 shadow-sm">
+            <span class="w-2.5 h-2.5 rounded-full bg-yellow-300 animate-pulse"></span>
+            <span class="text-sm tracking-wide text-deepBhagwa">Personalised Spiritual Event Planning</span>
+          </div>
+
+          <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight font-heading text-deepBhagwa">
+            Build Your
+            <span class="text-bhagwa block">Sanatan Quote</span>
+          </h1>
+
+          <p class="mt-6 text-base md:text-lg text-darkBrown/80 max-w-2xl leading-8">
+            Select your service, decor, seating, prasad, welcome experiences, and add-ons
+            to generate a beautiful estimated quote for your spiritual gathering.
+          </p>
+
+          <div class="mt-8 flex flex-wrap gap-4">
+            <a href="#quote-builder" class="px-7 py-3.5 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 text-darkBrown font-semibold shadow-glow hover:scale-105 transition">
+              Start Building
+            </a>
+            <a href="#contact" class="px-7 py-3.5 rounded-full border border-orange-300 text-deepBhagwa font-medium hover:bg-white/70 transition">
+              Talk to Our Team
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INTRO -->
+    <section class="py-12">
+      <div class="max-w-5xl mx-auto px-6 lg:px-10 text-center reveal opacity-0 translate-y-6 transition-all duration-500">
+        <p class="text-bhagwa font-semibold tracking-[0.25em] uppercase text-sm">Quick Estimate</p>
+        <h2 class="mt-4 text-3xl md:text-5xl font-bold text-deepBhagwa font-heading">
+          Plan Your Experience With Clarity
+        </h2>
+        <p class="mt-6 text-base md:text-lg leading-8 text-darkBrown/80">
+          This quote builder helps you mix and match devotional services, event formats,
+          hospitality, and add-ons in one place, so you can get a clear event estimate quickly.
+        </p>
+      </div>
+    </section>
+
+    <!-- QUOTE BUILDER -->
+    <section id="quote-builder" class="py-10">
+      <div class="max-w-5xl mx-auto px-6 lg:px-10">
+        <div class="rounded-[2.2rem] bg-white/85 backdrop-blur-xl border border-orange-200 shadow-spiritual p-6 md:p-8 reveal opacity-0 translate-y-6 transition-all duration-500">
+
+          <!-- CLIENT INFO -->
+          <div class="mb-8">
+            <div class="section-divider">Client Info</div>
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium mb-2 text-deepBhagwa">Client Name</label>
+                <input class="text-input" id="cname" placeholder="e.g. Sharma Family" oninput="upd()" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-2 text-deepBhagwa">Phone</label>
+                <input class="text-input" id="cphone" placeholder="+91 XXXXX XXXXX" oninput="upd()" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-2 text-deepBhagwa">Event Type</label>
+                <select class="text-input" id="cevent" onchange="upd()">
+                  <option value="">Select event</option>
+                  <option>Griha Pravesh</option>
+                  <option>Birthday Puja</option>
+                  <option>Corporate Puja</option>
+                  <option>Navratri</option>
+                  <option>Wedding Ritual</option>
+                  <option>Society / RWA Event</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-2 text-deepBhagwa">Event Date</label>
+                <input class="text-input" id="cdate" type="date" oninput="upd()" />
+              </div>
+            </div>
+          </div>
+
+          <!-- SERVICE -->
+          <div class="mb-8">
+            <div class="section-divider">Service / Pooja</div>
+            <div class="flex flex-wrap gap-2" id="svc-pills">
+              <span class="pill" onclick="selPkg('svc','shraddha',this)">Shraddha — ₹21,000</span>
+              <span class="pill" onclick="selPkg('svc','bhakti',this)">Bhakti — ₹41,000</span>
+              <span class="pill" onclick="selPkg('svc','divya',this)">Divya — ₹1,00,000+</span>
+            </div>
+            <div class="detail-card" id="svc-detail"></div>
+          </div>
+
+          <!-- DECOR -->
+          <div class="mb-8">
+            <div class="section-divider">Decor</div>
+            <div class="flex flex-wrap gap-2" id="dec-pills">
+              <span class="pill" onclick="selPkg('dec','saral',this)">Saral — ₹11,000</span>
+              <span class="pill" onclick="selPkg('dec','utsav',this)">Utsav — ₹41,000</span>
+              <span class="pill" onclick="selPkg('dec','swarn',this)">Swarn — ₹75,000+</span>
+            </div>
+            <div class="detail-card" id="dec-detail"></div>
+          </div>
+
+          <!-- SEATING -->
+          <div class="mb-8">
+            <div class="section-divider">Seating</div>
+            <div class="flex flex-wrap gap-2" id="seat-pills">
+              <span class="pill" onclick="selPkg('seat','dharti',this)">Dharti Floor — ₹100/person</span>
+              <span class="pill" onclick="selPkg('seat','aasan',this)">Aasan Chair — ₹500/person</span>
+              <span class="pill" onclick="selPkg('seat','sneh',this)">Sneh VIP — ₹2,000/person</span>
+            </div>
+            <div class="detail-card" id="seat-detail"></div>
+            <div id="seat-pax" class="hidden mt-4 flex items-center gap-3 flex-wrap">
+              <label class="text-sm text-deepBhagwa font-medium" id="seat-pax-lbl">No. of guests</label>
+              <input class="pax-input" type="number" id="pax-seat" min="0" placeholder="0" oninput="calcSeat()" />
+              <span class="text-sm font-semibold text-bhagwa" id="seat-live"></span>
+            </div>
+          </div>
+
+          <!-- PRASAD -->
+          <div class="mb-8">
+            <div class="section-divider">Prasad</div>
+            <div class="flex flex-wrap gap-2" id="prs-pills">
+              <span class="pill" onclick="selPkg('prs','patra',this)">Patra — ₹30/person</span>
+              <span class="pill" onclick="selPkg('prs','bhandara',this)">Bhandara — ₹120/person</span>
+              <span class="pill" onclick="selPkg('prs','divyab',this)">Divya Bhandara — ₹200/person</span>
+            </div>
+            <div class="detail-card" id="prs-detail"></div>
+            <div id="prs-pax" class="hidden mt-4 flex items-center gap-3 flex-wrap">
+              <label class="text-sm text-deepBhagwa font-medium">No. of guests</label>
+              <input class="pax-input" type="number" id="pax-prs" min="0" placeholder="0" oninput="calcPrs()" />
+              <span class="text-sm font-semibold text-bhagwa" id="prs-live"></span>
+            </div>
+          </div>
+
+          <!-- WELCOME -->
+          <div class="mb-8">
+            <div class="section-divider">Welcome Services</div>
+            <div class="flex flex-wrap gap-2" id="wel-pills">
+              <span class="pill" onclick="togWel(this,3000,'Tilak Ceremony')">Tilak — ₹3,000</span>
+              <span class="pill" onclick="togWel(this,2500,'Mala Wearing')">Mala — ₹2,500</span>
+              <span class="pill" onclick="togWel(this,5000,'Phoolon ki Varsha')">Phool Varsha — ₹5,000</span>
+              <span class="pill" onclick="togWel(this,5000,'Entry Song Live')">Entry Song — ₹5,000</span>
+              <span class="pill" onclick="togWel(this,2000,'Shankh Naad')">Shankh Naad — ₹2,000</span>
+              <span class="pill" onclick="togWel(this,3500,'Welcome Aarti')">Aarti — ₹3,500</span>
+              <span class="pill bundle" onclick="togBundle(this)">Full Bundle — ₹15,000</span>
+            </div>
+          </div>
+
+          <!-- ADDONS -->
+          <div class="mb-8">
+            <div class="section-divider">Add-ons</div>
+            <div class="flex flex-wrap gap-2" id="add-pills">
+              <span class="pill" onclick="togAdd(this,8000,'Charan Paduka Stall')">Charan Paduka — ₹8,000</span>
+              <span class="pill" onclick="togAdd(this,12000,'Photo + Video')">Photo + Video — ₹12,000</span>
+              <span class="pill" onclick="togAdd(this,6000,'Live Reel Creator')">Reel Creator — ₹6,000</span>
+              <span class="pill" onclick="togAdd(this,2500,'Digital Invite')">Digital Invite — ₹2,500</span>
+              <span class="pill" onclick="togAdd(this,5000,'Pandit Q&A')">Pandit Q&A — ₹5,000</span>
+              <span class="pill" onclick="togAdd(this,3000,'Incense Setup')">Incense Setup — ₹3,000</span>
+            </div>
+
+            <div class="mt-4 flex items-center gap-3 flex-wrap">
+              <label class="text-sm text-deepBhagwa font-medium">Souvenir Box (₹150/person)</label>
+              <input class="pax-input" type="number" id="pax-sov" min="0" placeholder="0" oninput="calcSov()" />
+              <span class="text-sm font-semibold text-bhagwa" id="sov-live"></span>
+            </div>
+          </div>
+
+          <!-- SUMMARY -->
+          <div class="rounded-[1.8rem] bg-orange-50/80 border border-orange-200 p-5 md:p-6">
+            <p class="text-[11px] font-semibold uppercase tracking-widest text-bhagwa mb-4">Estimated Quote</p>
+
+            <div id="sum-rows">
+              <p class="text-sm text-darkBrown/60 text-center py-2">Select services above to build your quote</p>
+            </div>
+
+            <div class="mt-5 pt-4 border-t border-orange-200 flex items-center justify-between">
+              <span class="text-lg md:text-xl font-semibold text-deepBhagwa">Estimated Total</span>
+              <span id="grand" class="text-2xl md:text-3xl font-bold text-bhagwa">₹0</span>
+            </div>
+
+            <div class="mt-6 flex flex-wrap gap-3">
+              <button class="btn-primary" onclick="makePDF()">Download Quote PDF</button>
+              <button class="btn-ghost" onclick="resetAll()">Reset</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT CTA -->
+    <section id="contact" class="py-20">
+      <div class="max-w-4xl mx-auto px-6 lg:px-10">
+        <div class="rounded-[2.2rem] bg-white/80 backdrop-blur-xl border border-orange-200 shadow-spiritual p-6 md:p-10 reveal opacity-0 translate-y-6 transition-all duration-500">
+          <div class="text-center">
+            <p class="text-bhagwa font-semibold tracking-[0.25em] uppercase text-sm">Need Help?</p>
+            <h2 class="mt-4 text-3xl md:text-5xl font-bold text-deepBhagwa font-heading">Want a Custom Quote?</h2>
+            <p class="mt-4 text-darkBrown/75 leading-8 max-w-2xl mx-auto">
+              If your event needs a custom combination, artist selection, or premium setup,
+              connect with our team and we’ll create a tailored estimate for you.
+            </p>
+            <div class="mt-8 flex flex-wrap justify-center gap-4">
+              <a href="https://wa.me/919911826993" target="_blank" class="px-7 py-3.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold shadow-spiritual hover:scale-105 transition">
+                WhatsApp Us
+              </a>
+              <a href="index.html#contact" class="px-7 py-3.5 rounded-full border border-orange-300 text-deepBhagwa font-medium hover:bg-white/70 transition">
+                Fill Main Enquiry Form
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="relative pt-16 pb-8 border-t border-orange-200 bg-gradient-to-b from-orange-50/50 to-yellow-50/40">
+      <div class="max-w-7xl mx-auto px-6 lg:px-10">
+        <div class="grid md:grid-cols-3 gap-10 items-start">
+          <div>
+            <div class="flex items-center gap-3">
+              <img
+                src="assets/images/SK logo.png"
+                alt="Sanatan Kriya Logo"
+                class="h-16 w-auto object-contain"
+              />
+            </div>
+            <p class="mt-5 text-darkBrown/75 leading-7 max-w-sm">
+              Creating spiritually rich experiences through devotion, sacred music, divine storytelling, and traditional gatherings.
+            </p>
+          </div>
+
+          <div>
+            <h4 class="text-xl font-semibold text-deepBhagwa">Quick Links</h4>
+            <div class="mt-5 space-y-3 text-darkBrown/80">
+              <a href="index.html" class="block hover:text-bhagwa transition">Home</a>
+              <a href="about.html" class="block hover:text-bhagwa transition">About</a>
+              <a href="quote-builder.html" class="block hover:text-bhagwa transition">Quote Builder</a>
+              <a href="index.html#contact" class="block hover:text-bhagwa transition">Contact</a>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="text-xl font-semibold text-deepBhagwa">Connect With Us</h4>
+            <p class="mt-5 text-darkBrown/80">
+              WhatsApp:
+              <a href="https://wa.me/919911826993" target="_blank" class="text-bhagwa font-semibold hover:underline">
+                +91 99118 26993
+              </a>
+            </p>
+            <p class="mt-4 text-darkBrown/80">
+              Email:
+              <a href="mailto:sanatankikriya@gmail.com" class="text-bhagwa font-semibold hover:underline">
+                sanatankikriya@gmail.com
+              </a>
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-12 pt-6 border-t border-orange-200 text-center text-sm text-darkBrown/65">
+          © 2026 Sanatan Kriya. All Rights Reserved. |
+          <a href="terms.html" class="hover:text-bhagwa transition">Terms & Conditions</a> |
+          <a href="privacy.html" class="hover:text-bhagwa transition">Privacy Policy</a>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="js/form.js"></script>
+  
+</body>
+</html>
